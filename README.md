@@ -1,2 +1,4 @@
 # BigMath
-BigInt math focused on primes fand factorization
+BigInt math focused on primes and factorization
+
+currently a mess in progress
