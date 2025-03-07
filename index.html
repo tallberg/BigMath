@@ -4,19 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    
-
+    <section class="prime-generator">
+        <h2>Generate Prime Number</h2>
+        <form>
+          <label for="genPrime">Bit size:</label>
+          <input type="text" name="genPrime" id="genPrimeInput" value="64" placeholder="Bit size">
+          <button type="button" id="genPrimeBtn">Generate</button>
+          <div class="disclamer">Deterministic up to 2<sup>64</sup>, larger numbers are probabilistically determined by the Solovay-Strassen algorithm.</div>
+          <div id="genPrimeResult"></div>
+        </form>
+      </section>
+      
+      <section class="prime-checker">
+        <h2>Check if Number is Prime</h2>
+        <form>
+          <label for="isPrime">Number:</label>
+          <input type="text" name="isPrime" id="isPrimeInput" value="13546846216841">
+          <button type="button" id="isPrimeBtn">Check</button>
+          <div class="disclamer">Deterministic up to 2<sup>64</sup>, larger numbers are probabilistically determined by the Solovay-Strassen algorithm.</div>
+          <div id="isPrimeResult"></div>
+        </form>
+      </section>
 
     <script type="module">
-        import isPrime from "./index.js";
-    
-        console.log(isPrime(101n)); // true (prime)
-        console.log(isPrime(561n)); // false (Carmichael number)
-        console.log(isPrime(99991n)); // true (prime)
-        console.log(isPrime(15n)); // false (composite)
+        import isPrime, {randomPrime} from "./index.js";
+
+        document.getElementById('genPrimeBtn').addEventListener('click', () => genPrime());
+        document.getElementById('isPrimeBtn').addEventListener('click', () => isNumPrime());
+
+        function genPrime(){
+            const input = document.getElementById('genPrimeInput').value;
+            console.log('gen prime', input);
+            const p = randomPrime(input);
+            console.log(randomPrime.toString());
+            console.log(p);
+            document.getElementById('genPrimeResult').innerText = p;
+        }
+        function isNumPrime(){
+            console.log('is prime');
+            const input = BigInt(document.getElementById('isPrimeInput').value);
+            const res = isPrime(input) ? (input < 2n**64n ? 'sure is!' : 'looks like it') : 'nope.';
+            document.getElementById('isPrimeResult').innerText =  res;
+        }
+
     </script>
 </body>
 </html>

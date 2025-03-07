@@ -1,13 +1,4 @@
-export {intSqrtBinarySearch, intSqrtBitwise, intSqrtNewton, sqrt as default}
-
-/**
- * Computes the integer square root of a BigInt.
- * Complexity: O(log n)
- * Always returns floor(sqrt(n)).
- * @param {bigint} n - The number to find the square root of.
- * @returns {bigint} - The largest integer x such that x² ≤ n.
- */
-const sqrt =  intSqrtNewton;
+export {intSqrtBinarySearch, intSqrtBitwise, intSqrtNewton as default}
 
 /**
  * Computes the integer square root of a BigInt using binary search.

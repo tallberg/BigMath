@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+<script type="module">
+
+import  polyMulKaratsuba,{polyMulMod} from "../src/poly-mul.js"
+
+function assertArraysEqual(actual, expected, message) {
+        if (actual.length !== expected.length) {
+            document.writeln(`${message}: Length mismatch. Expected ${expected.length} but got ${actual.length}`);
+            throw new Error(`${message}: Length mismatch. Expected ${expected.length} but got ${actual.length}`);
+        }
+        for (let i = 0; i < actual.length; i++) {
+            if (actual[i] !== expected[i]) {
+                document.writeln(`${message}: Length mismatch. Expected ${expected.length} but got ${actual.length}`);
+                throw new Error(`${message}: Expected ${expected[i]} but got ${actual[i]} at index ${i}`);
+            }
+        }
+    }
+
+function testPolyMulMod(polyMulFn) {
+    
+        // Test case 1: Multiplying two polynomials of the same length
+        const A1 = [1n, 2n];
+        const B1 = [3n, 4n];
+        const mod1 = 5n;
+        const r1 = 2n;
+        const expected1 = [3n, 0n, 3n];
+        const result1 = polyMulFn(A1, B1, mod1, r1);
+        assertArraysEqual(result1, expected1, 'Test case 1');
+
+        // Test case 2: Multiplying two polynomials of different lengths
+        const A2 = [1n, 2n];
+        const B2 = [3n, 4n, 5n];
+        const mod2 = 7n;
+        const r2 = 3n;
+        const expected2 = [3n, 10n, 4n];
+        const result2 = polyMulFn(A2, B2, mod2, r2);
+        assertArraysEqual(result2, expected2, 'Test case 2');
+
+        // Test case 3: Multiplying polynomials with zero coefficients
+        const A3 = [0n, 1n, 2n];
+        const B3 = [3n, 0n, 4n];
+        const mod3 = 7n;
+        const r3 = 3n;
+        const expected3 = [0n, 0n, 8n];
+        const result3 = polyMulFn(A3, B3, mod3, r3);
+        assertArraysEqual(result3, expected3, 'Test case 3');
+
+        // Test case 4: Multiplying polynomials with large coefficients
+        const A4 = [BigInt(1e18), BigInt(2e18), BigInt(3e18)];
+        const B4 = [BigInt(4e18), BigInt(5e18), BigInt(6e18)];
+        const mod4 = BigInt(7e18);
+        const r4 = BigInt(3e18);
+        const expected4 = [BigInt(3e18), BigInt(10e18), BigInt(18e18)];
+        const result4 = polyMulFn(A4, B4, mod4, r4);
+        assertArraysEqual(result4, expected4, 'Test case 4');
+
+        document.writeln('All tests passed!');
+        console.log('All tests passed!');
+
+}
+
+document.writeln("Testing polymulmod");
+testPolyMulMod(polyMulMod);
+document.writeln("Testing polymulkaratsuba");
+testPolyMulMod(polyMulKaratsuba);
+
+</script>
+</body>
+</html>

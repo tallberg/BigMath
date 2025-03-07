@@ -1,4 +1,4 @@
-import polyMulMod from "./poly-mul.js";
+import {polyMulMod} from "./poly-mul.js";
 export {modPolyExp as default}
 
 // Computes (x + a)^n ≡ x^n + a (mod n, x^r - 1)
@@ -7,8 +7,8 @@ const modPolyExp = (coeffs, exp, mod, r) => {
     res[0] = 1n;
   
     while (exp > 0n) {
-      if (exp % 2n === 1n) res = polyModMul(res, coeffs, mod, r);
-      coeffs = polyModMul(coeffs, coeffs, mod, r);
+      if (exp % 2n === 1n) res = polyMulMod(res, coeffs, mod, r);
+      coeffs = polyMulMod(coeffs, coeffs, mod, r);
       exp /= 2n;
     }
   

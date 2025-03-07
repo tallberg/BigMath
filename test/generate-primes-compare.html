@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Algorithm Test App</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <h1>Algorithm Test Application</h1>
+  <form id="settings-form">
+    <div class="form-group" id="algorithms">
+      <label>Select Algorithms:</label>
+    </div>
+    <div class="form-group inline-group">
+      <label>Start Value (2<sup>x</sup>-1):</label>
+      <input type="number" name="start-value" min="2" value="2">
+    </div>
+    <div class="form-group inline-group">
+      <label>End Value (2<sup>x</sup>-1):</label>
+      <input type="number" name="end-value" min="2" value="20">
+    </div>
+    <div class="form-group inline-group">
+      <label>Iterations per Step:</label>
+      <input type="number" name="iterations" value="1">
+    </div>
+    <div class="form-group inline-group">
+      <label>Number of Steps:</label>
+      <input type="number" name="steps" value="50">
+    </div>
+    <div class="form-group inline-group">
+      <label>Timeout (ms):</label>
+      <input type="number" name="timeout" value="1000">
+    </div>
+    <button type="button" id="start-btn">Start</button>
+  </form>
+  <canvas id="chart"></canvas>
+
+  <script type="module">
+    import sieveOfEratosthenes, {sieveOfEratosthenes2}  from "../src/sieve-of-eratosthenes.js"
+    import sieveOfAtkin from "../src/sieve-of-atkin.js"
+    
+    let algorithms = {
+      "Eratosthenes": sieveOfEratosthenes,
+      "Eratosthenes2": sieveOfEratosthenes2,
+      "Atkin": sieveOfAtkin
+    };
+
+    const algorithmGroup = document.getElementById("algorithms");
+    Object.keys(algorithms).forEach(k => algorithmGroup.innerHTML += `<input type="checkbox" name="algorithms" value="${k}" checked> ${k}<br>`);
+
+    const settingsForm = document.getElementById("settings-form");
+    const startBtn = document.getElementById("start-btn");
+    const ctx = document.getElementById("chart").getContext("2d");
+
+    const Colors = {
+      i: 10,
+      next() {
+        const h = this.i * 108 % 360;
+        const s = 60 + (15 + 10 * Math.floor(this.i / 3)) % 40;
+        const l = 40 + (15 + 10 * Math.floor((this.i + 3) / 3)) % 40;
+        this.i++;
+        return `hsl(${h},${s}%,${l}%)`
+      },
+      reset() {
+        this.i = 10;
+      }
+    }
+
+    let chart = new Chart(ctx, {
+      type: 'line',
+      data: { labels: [], datasets: [] },
+      options: { animation: false, scales: { x: { type: 'linear' } } }
+    });
+
+
+    startBtn.addEventListener("click", async () => {
+      const formData = new FormData(settingsForm);
+      const selectedAlgorithms = formData.getAll("algorithms");
+      const startValue = 2n ** BigInt(formData.get("start-value")) - 1n;
+      const endValue = 2n ** BigInt(formData.get("end-value")) - 1n;
+      const iterations = parseInt(formData.get("iterations"));
+      const steps = parseInt(formData.get("steps"));
+      const timeout = parseInt(formData.get("timeout"));
+      const excluded = [];
+
+      console.log(startValue, endValue);
+
+      chart.data.labels = [];
+      chart.data.datasets = selectedAlgorithms.map(alg => ({
+        label: alg,
+        data: [],
+        borderColor: Colors.next()
+      }));
+
+      for (let step = 0n; step < steps; step++) {
+        const currentValue = startValue + BigInt(step) * BigInt(Math.max(1, Math.ceil(Number((endValue - startValue) / BigInt(steps)))));
+
+        chart.data.labels.push(currentValue.toString());
+        console.log("step", step)
+
+        for (const dataset of chart.data.datasets) {
+          const alg = dataset.label;
+          if (excluded.indexOf(alg) > -1) continue;
+          let totalTime = 0;
+          let start = performance.now();
+
+          for (let i = 0; i < iterations; i++) {
+            const result = algorithms[alg](currentValue + BigInt(i));
+          }
+
+          totalTime = performance.now() - start;
+
+          console.log(alg, totalTime);
+
+          dataset.data.push(totalTime);
+
+          if (totalTime > timeout) {
+            console.log(alg, "is taking too long");
+            excluded.push(alg);
+          }
+        }
+
+        chart.update();
+
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+
+    });
+
+  </script>
+</body>
+
+</html>
