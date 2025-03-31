@@ -21,7 +21,7 @@
     </div>
     <div class="form-group inline-group">
       <label>End Value (2<sup>x</sup>-1):</label>
-      <input type="number" name="end-value" min="2" value="20">
+      <input type="number" name="end-value" min="2" value="25">
     </div>
     <div class="form-group inline-group">
       <label>Iterations per Step:</label>
@@ -29,7 +29,7 @@
     </div>
     <div class="form-group inline-group">
       <label>Number of Steps:</label>
-      <input type="number" name="steps" value="50">
+      <input type="number" name="steps" value="20">
     </div>
     <div class="form-group inline-group">
       <label>Timeout (ms):</label>
@@ -40,13 +40,15 @@
   <canvas id="chart"></canvas>
 
   <script type="module">
-    import sieveOfEratosthenes, {sieveOfEratosthenes2}  from "../src/sieve-of-eratosthenes.js"
+    import sieveOfEratosthenes, {sieveOfEratosthenes2,sieveOfEratosthenesClaude,sieveOfEratosthenesGptFirst,sieveOfEratosthenesClaudeBit}  from "../src/sieve-of-eratosthenes.js"
     import sieveOfAtkin from "../src/sieve-of-atkin.js"
     
     let algorithms = {
       "Eratosthenes": sieveOfEratosthenes,
       "Eratosthenes2": sieveOfEratosthenes2,
-      "Atkin": sieveOfAtkin
+      "Claude": sieveOfEratosthenesClaude,
+      "ClaudeBit": sieveOfEratosthenesClaudeBit,      
+      "GptFirst": sieveOfEratosthenesGptFirst
     };
 
     const algorithmGroup = document.getElementById("algorithms");

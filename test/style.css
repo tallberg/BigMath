@@ -1,6 +1,8 @@
 body {
     font-family: Arial, sans-serif;
-    margin: 20px;
+    margin-top: 20px;
+    width: 80%;
+    margin: auto;
 }
 h1 {
     text-align: center;

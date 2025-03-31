@@ -16,21 +16,21 @@
       <label>Select Algorithms:</label>
     </div>
     <div class="form-group inline-group">
-      <label>Start Value (2<sup>x</sup>-1):</label>
-      <input type="number" name="start-value" min="2" value="2">
+      <label>Factor bits start:</label>
+      <input type="number" name="start-value" min="8" value="8">
     </div>
     <div class="form-group inline-group">
-      <label>End Value (2<sup>x</sup>-1):</label>
-      <input type="number" name="end-value" min="2" value="64">
+      <label>Factor bits end:</label>
+      <input type="number" name="end-value" min="8" value="64">
     </div>
     <div class="form-group inline-group">
       <label>Iterations per Step:</label>
-      <input type="number" name="iterations" value="1000">
+      <input type="number" name="iterations" value="10">
     </div>
-    <div class="form-group inline-group">
+    <!-- <div class="form-group inline-group">
       <label>Number of Steps:</label>
       <input type="number" name="steps" value="50">
-    </div>
+    </div> -->
     <div class="form-group inline-group">
       <label>Timeout (ms):</label>
       <input type="number" name="timeout" value="1000">
@@ -40,28 +40,36 @@
   <canvas id="chart"></canvas>
 
   <script type="module">
-    import isPrimeAKS, {isPrimeAKS2, isPrimeAKS3}  from "../src/is-prime-aks.js"
-    import isPrimeLucas  from "../src/is-prime-lucas.js"
-    import isPrimeFermat, {isPrimeFermat2} from "../src/is-prime-fermat.js"
-    import isPrimeMillerRabin, {isPrimeMillerRabinDeterministic} from "../src/is-prime-miller-rabin.js"
-    import isPrimeSolovayStrassen from "../src/is-prime-solovay-strassen.js"
-    import isPrimeTrial, {isPrimeTrialStep6} from "../src/is-prime-trial.js"
-    import isPrimeBailliePsw from "../src/is-prime-baillie-psw.js"
+    import randomPrime from "../src/random-prime.js"
+    import factorTrial, {factorTrial30, factorTrial30R} from "../src/factor-trial.js"
+    import factorPollardRho from "../src/factor-pollard-rho.js"
+    import factorPollardBrent from "../src/factor-pollard-brent.js"
+    import lenstra from "../src/factor-lenstra-ecm.js"
+    import ecmGrok3 from "../src/factor-ecm-grok.js"
+    import qs from "../src/factor-qs.js"
 
-    let algorithms = {
-      "AKS": isPrimeAKS,
-      "AKS2": isPrimeAKS2,
-      "AKS3": isPrimeAKS3,
-      "Trial30": isPrimeTrial,
-      "Trial6": isPrimeTrialStep6,
-      "BailliePSW": isPrimeBailliePsw,
-      "Fermat": isPrimeFermat,
-      "Fermat2": isPrimeFermat2,
-      "Lucas": isPrimeLucas,
-      "Miller": isPrimeMillerRabin,
-      "MillerD": isPrimeMillerRabinDeterministic,
-      "Strassen": isPrimeSolovayStrassen
+    const algorithms = {
+      "Trial": factorTrial,
+      "Trial30": factorTrial30,
+      "Trial30R": factorTrial30R,
+      "PollardRho": factorPollardRho,
+      "PollardBrent": factorPollardBrent,
+      "lenstra": lenstra,
+      "EcmGrok": ecmGrok3,
+      "QS": qs
     };
+
+    function generateProducts(factorSize, n) {
+      return new Array(n).fill(0).map(_ => {
+        const p = randomPrime(factorSize);
+        const q = randomPrime(factorSize);
+        const pq = p*q;
+        console.log(p,q,pq);
+        return pq;
+      });
+      
+      //return new Array(n).map(_ => randomPrime(factorSize) * randomPrime(factorSize));
+    }
 
     const algorithmGroup = document.getElementById("algorithms");
     Object.keys(algorithms).forEach(k => algorithmGroup.innerHTML += `<input type="checkbox" name="algorithms" value="${k}"> ${k}<br>`);
@@ -94,14 +102,14 @@
     startBtn.addEventListener("click", async () => {
       const formData = new FormData(settingsForm);
       const selectedAlgorithms = formData.getAll("algorithms");
-      const startValue = 2n ** BigInt(formData.get("start-value")) - 1n;
-      const endValue = 2n ** BigInt(formData.get("end-value")) - 1n;
+      const startValue = BigInt(formData.get("start-value"));
+      const endValue = BigInt(formData.get("end-value"));
       const iterations = parseInt(formData.get("iterations"));
-      const steps = parseInt(formData.get("steps"));
+      const steps = endValue - startValue; //parseInt(formData.get("steps"));
       const timeout = parseInt(formData.get("timeout"));
       const excluded = [];
 
-      console.log(startValue, endValue);
+      console.log(startValue, endValue, steps, iterations);
 
       chart.data.labels = [];
       chart.data.datasets = selectedAlgorithms.map(alg => ({
@@ -111,10 +119,16 @@
       }));
 
       for (let step = 0n; step < steps; step++) {
-        const currentValue = startValue + BigInt(step) * BigInt(Math.max(1, Math.ceil(Number((endValue - startValue) / BigInt(steps)))));
+        if (excluded.length === selectedAlgorithms.length) break;
+        const currentValue = startValue + BigInt(step);
 
         chart.data.labels.push(currentValue.toString());
-        console.log("step", step)
+
+        console.log("step", step, "current value", currentValue)
+        console.log("generating primes");
+        const products = generateProducts(Number(currentValue), iterations);
+        console.log(products);
+        console.log("-------------------------------------------");
 
         for (const dataset of chart.data.datasets) {
           const alg = dataset.label;
@@ -122,13 +136,16 @@
           let totalTime = 0;
           let start = performance.now();
 
-          for (let i = 0; i < iterations; i++) {
-            const result = algorithms[alg](currentValue + BigInt(i));
+          for (let p of products) {
+            console.log(`  ${alg}(${p})`);
+            const result = algorithms[alg](p);
+            console.log(!result || result === p || result === 1n ? '  FAIL!': '  '+result);
           }
 
           totalTime = performance.now() - start;
 
-          console.log(alg, totalTime);
+          console.log("time", totalTime);
+          console.log("-------------------------------------------");
 
           dataset.data.push(totalTime);
 
@@ -142,6 +159,7 @@
 
         await new Promise(resolve => setTimeout(resolve, 10));
       }
+      console.log("DONE :D");
 
     });
 

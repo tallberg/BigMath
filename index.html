@@ -37,10 +37,7 @@
 
         function genPrime(){
             const input = document.getElementById('genPrimeInput').value;
-            console.log('gen prime', input);
             const p = randomPrime(input);
-            console.log(randomPrime.toString());
-            console.log(p);
             document.getElementById('genPrimeResult').innerText = p;
         }
         function isNumPrime(){

@@ -1,12 +1,7 @@
-import { isPrimeMillerRabinDeterministic } from "./is-prime-miller-rabin.js";
-import isPrimeSolovayStrassen from "./is-prime-solovay-strassen.js";
+import isPrimeBailliePsw from "./is-prime-baillie-psw.js";
 export {isPrime as default}
 
-const deterministicLimit = 2n**64n;
+/** Use a combination of trial division, Miller-Rabin and Lucas tests to get a deterministic result for numbers up to 2^64, and higly probable for numbers beyond */
 const isPrime = (n) => {
-    if (n < deterministicLimit) {
-        return isPrimeMillerRabinDeterministic(n)
-    } else {
-        return isPrimeSolovayStrassen(n)
-    }
+    return isPrimeBailliePsw(n)
 }

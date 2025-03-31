@@ -1,5 +1,5 @@
-import modExp from "./mod-exp.js";
-export {isPrimeMillerRabin as default, isPrimeMillerRabinDeterministic}
+import modExp, {modExp2}from "./mod-exp.js";
+export {isPrimeMillerRabin as default, isPrimeMillerRabinDeterministic, isPrimeMillerRabinBase2}
 
 /**
  * Miller-Rabin Primality Test
@@ -25,9 +25,9 @@ const isPrimeMillerRabin = (n, k = 5) => {
     // Write n-1 as d * 2^r
     let d = n - 1n;
     let r = 0n;
-    while (d % 2n === 0n) {
-      d /= 2n;
-      r += 1n;
+    while ((d & 1n) === 0n) {
+      d >>= 1n;
+      ++r;
     }
   
     // Perform k iterations of the test
@@ -38,7 +38,7 @@ const isPrimeMillerRabin = (n, k = 5) => {
       if (x === 1n || x === n - 1n) continue; // Passes this round
   
       let isComposite = true;
-      for (let j = 0n; j < r - 1n; j++) {
+      while (--r) {
         x = modExp(x, 2n, n);
         if (x === n - 1n) {
           isComposite = false;
@@ -74,9 +74,9 @@ const isPrimeMillerRabinDeterministic = (n) => {
   // Write n-1 as d * 2^r
   let d = n - 1n;
   let r = 0n;
-  while (d % 2n === 0n) {
-    d /= 2n;
-    r += 1n;
+  while ((d & 1n) === 0n) {
+    d >>= 1n;
+    ++r;
   }
 
   // Deterministic bases for n ≤ 2^64 (from known research)
@@ -92,7 +92,7 @@ const isPrimeMillerRabinDeterministic = (n) => {
     if (x === 1n || x === n - 1n) continue;
 
     let isComposite = true;
-    for (let j = 0n; j < r - 1n; j++) {
+    while (--r) {
       x = modExp(x, 2n, n);
       if (x === n - 1n) {
         isComposite = false;
@@ -105,3 +105,48 @@ const isPrimeMillerRabinDeterministic = (n) => {
 
   return true; // Definitely prime
 };
+
+const isPrimeMillerRabinBase2 = (n) => {
+  // Write n-1 as d * 2^r
+  let d = n - 1n;
+  let r = 0n;
+  while ((d & 1n) === 0n) {
+    d >>= 1n;
+    ++r;
+  }
+
+  // Compute 2^d mod n
+  let x = modExp2(d, n);    
+  if (x === 1n || x === n - 1n) return true;
+
+  // Check squaring step
+  while (--r) {
+    x = modExp(x, 2n, n);
+    if (x === n - 1n) return true;
+  }
+
+  return false;
+};
+
+function isPrimeMillerRabinBase22(n) {
+  if (n <= 1) return false;
+  if (n <= 3) return true;
+  if (n % 2 === 0) return false;
+
+  let d = n - 1;
+  while (d % 2 === 0) {
+      d /= 2;
+  }
+
+  let x = 2n ** BigInt(d) % n;
+  if (x === 1n || x === n - 1n) return true;
+
+  while (d !== n - 1) {
+      x = (x * x) % n;
+      d *= 2;
+      if (x === 1n) return false;
+      if (x === n - 1n) return true;
+  }
+
+  return false;
+}

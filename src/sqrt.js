@@ -13,7 +13,7 @@ const intSqrtBinarySearch = (n) => {
     
     let left = 1n, right = n, mid;
     while (left <= right) {
-      mid = (left + right) / 2n;
+      mid = (left + right) >> 1n;
       let square = mid * mid;
       if (square === n) return mid;
       if (square < n) left = mid + 1n;
@@ -33,10 +33,10 @@ const intSqrtBinarySearch = (n) => {
     if (n < 0n) throw new Error("Square root of negative number is not defined");
     if (n < 2n) return n;
     
-    let x = n, y = (x + 1n) / 2n;
+    let x = n, y = (x + 1n) >> 1n;
     while (y < x) {
       x = y;
-      y = (x + n / x) / 2n;
+      y = (x + n / x) >> 1n;
     }
     return x;
   };

@@ -4,10 +4,8 @@ export {randomPrime as default}
 
 const randomPrime = (bitLength) => {
     let candidate;
-    console.log('random prime', bitLength);
     do {
-        candidate = randomBits(bitLength) | 1n; // random odd number
-        console.log('candidate: ', candidate);
+        candidate = randomBits(bitLength) | 1n; // random odd number        
     } while (!isPrime(candidate));
     return candidate;
 }

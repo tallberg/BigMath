@@ -31,7 +31,7 @@ form {
     border: 1px solid #ccc;
     box-sizing: border-box;
     display: inline-block;
-    vertical-align: middle;
+    vertical-align: middle;    
   }
   
   button[type="button"] {
@@ -60,6 +60,7 @@ form {
     border: 1px solid #ccc;
     border-radius: 10px;
     background-color: #f0f0f0;
+    overflow-x: auto;
   }
   
   #genPrimeResult, #isPrimeResult p {
