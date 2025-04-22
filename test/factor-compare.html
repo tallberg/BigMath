@@ -44,9 +44,11 @@
     import factorTrial, {factorTrial30, factorTrial30R} from "../src/factor-trial.js"
     import factorPollardRho from "../src/factor-pollard-rho.js"
     import factorPollardBrent from "../src/factor-pollard-brent.js"
-    import lenstra from "../src/factor-lenstra-ecm.js"
-    import ecmGrok3 from "../src/factor-ecm-grok.js"
+    import ecmgemini from "../src/factor-ecm-gemini.js"
+    import ecm2 from "../src/factor-ecm-2phase.js"
+    import ecm from "../src/factor-ecm.js"
     import qs from "../src/factor-qs.js"
+    import qsg from "../src/factor-qs-gemini.js"
 
     const algorithms = {
       "Trial": factorTrial,
@@ -54,9 +56,11 @@
       "Trial30R": factorTrial30R,
       "PollardRho": factorPollardRho,
       "PollardBrent": factorPollardBrent,
-      "lenstra": lenstra,
-      "EcmGrok": ecmGrok3,
-      "QS": qs
+      "Ecm": ecm,
+      "Ecm2": ecm2,
+      "EcmGemeni": ecmgemini,
+      "QS": qs,
+      "QSG": qsg
     };
 
     function generateProducts(factorSize, n) {
@@ -134,12 +138,17 @@
           const alg = dataset.label;
           if (excluded.indexOf(alg) > -1) continue;
           let totalTime = 0;
+          let anySuccess = false;
+          let allSuccess = true;
           let start = performance.now();
 
           for (let p of products) {
             console.log(`  ${alg}(${p})`);
             const result = algorithms[alg](p);
-            console.log(!result || result === p || result === 1n ? '  FAIL!': '  '+result);
+            const fail = !result || result === p || result === 1n;
+            console.log(fail ? '  FAIL!': '  '+result);
+            anySuccess |= !fail;
+            allSuccess &= !fail;
           }
 
           totalTime = performance.now() - start;
@@ -147,12 +156,19 @@
           console.log("time", totalTime);
           console.log("-------------------------------------------");
 
-          dataset.data.push(totalTime);
+          if (!anySuccess) {
+            console.log(alg, "failed at all attempts");
+            excluded.push(alg);
+            continue;
+          }
 
           if (totalTime > timeout) {
             console.log(alg, "is taking too long");
             excluded.push(alg);
+            continue;
           }
+
+          dataset.data.push(totalTime);
         }
 
         chart.update();
